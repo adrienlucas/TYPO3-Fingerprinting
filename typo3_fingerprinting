@@ -69,7 +69,7 @@ if(sizeof($versions = matchVersionsByFilesums($_filesums)) > 0){
 	$displayed = 0;
 	foreach($versions as $v => $c){
 		$matched = intval($c*100/sizeof($targetSums));
-		if($matched > 75 || ++$displayed < 6) $res .= ' : '.$v.'('.$matched.'%)';
+		if($displayed++ < 6 || $matched > 75) $res .= ' : '.$v.'('.$matched.'%)';
 	}
 }else
 	$res = 'not matched';

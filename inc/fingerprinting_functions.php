@@ -27,7 +27,7 @@ $targetSums = array();
 
 function usage(){
 	global $argv;
-	exit("Usage : $ {$argv[0]} http://example.org/\n\n");
+	exit("Usage : $ {$argv[0]} [-debug] http://example.org/\n\n");
 }
 
 function matchBranchInMetatag(){
