@@ -24,20 +24,21 @@
 *  This copyright notice MUST APPEAR in all copies of the script!
 ***************************************************************/
 
+include('inc/global_functions.php');
 include('inc/fingerprinting_functions.php');
 
 echo "TYPO3 Fingerprinting (1st release)\n";
 if($argc < 2)
 	usage();
 	
-$_target = $argv[1];
+$_target = array_pop($argv);
 $_ctx = stream_context_create( //feel free to change (except 'ignore_errors')
 	array('http' =>
 		array(
 		    'method'  => 'GET',
 		    'header'  => '',
 		    'user_agent'  => 'Mozilla/5.0 is not my user-agent.',
-		    'ignore_errors' => TRUE
+		    'ignore_errors' => !optionIsSet('debug')
 		)
 	)
 );
@@ -61,15 +62,17 @@ echo "2. Release $res (changelog).\n";
 
 //3rd way : "La brute"
 include('fingerprints/filesums.php');
-global $remoteSums;
+global $targetSums;
 
 if(sizeof($versions = matchVersionsByFilesums($_filesums)) > 0){
-	$res = 'matched ';
+	$res = 'matched';
+	$displayed = 0;
 	foreach($versions as $v => $c){
 		$matched = intval($c*100/sizeof($targetSums));
-		if($matched > 75) $res .= ': '.$v.'('.$matched.'%)';
+		if($matched > 75 || ++$displayed < 6) $res .= ' : '.$v.'('.$matched.'%)';
 	}
 }else
 	$res = 'not matched';
 
 echo "3. Possible version(s) $res (fingerprints).\n";
+if(optionIsSet('debug')) echo "*. Target's fingerprints : ".var_export($targetSums, TRUE)."\n";
