@@ -1,0 +1,75 @@
+#!/usr/bin/php
+<?php
+/***************************************************************
+*  Copyright notice
+*
+*  (c) 2011 Adrien LUCAS <contact@adrienlucas.net>
+*  All rights reserved
+*
+*  This script is part of the TYPO3 Fingerprinting project. The 
+*  TYPO3 Fingerprinting project is free software but is not part of
+*  the TYPO3 project; you can redistribute it and/or modify
+*  it under the terms of the GNU General Public License as published by
+*  the Free Software Foundation; either version 2 of the License, or
+*  (at your option) any later version.
+*
+*  The GNU General Public License can be found at
+*  http://www.gnu.org/copyleft/gpl.html.
+*
+*  This script is distributed in the hope that it will be useful,
+*  but WITHOUT ANY WARRANTY; without even the implied warranty of
+*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*  GNU General Public License for more details.
+*
+*  This copyright notice MUST APPEAR in all copies of the script!
+***************************************************************/
+
+include('inc/fingerprinting_functions.php');
+
+echo "TYPO3 Fingerprinting (1st release)\n";
+if($argc < 2)
+	usage();
+	
+$_target = $argv[1];
+$_ctx = stream_context_create( //feel free to change (except 'ignore_errors')
+	array('http' =>
+		array(
+		    'method'  => 'GET',
+		    'header'  => '',
+		    'user_agent'  => 'Mozilla/5.0 is not my user-agent.',
+		    'ignore_errors' => TRUE
+		)
+	)
+);
+
+
+//1st way : "Le bon"
+if(($branch = matchBranchInMetatag()) !== FALSE)
+	$res = 'is '.$branch;
+else
+	$res = 'not found';
+	
+echo "1. Branch $res (meta tag).\n";
+	
+//2nd way : "Le truand"
+if(($version = matchVersionInChangelog(array('typo3/ChangeLog', 'typo3_src/ChangeLog', 'ChangeLog'))) !== FALSE)
+	$res = 'is '.$version;
+else
+	$res = "not found";
+	
+echo "2. Release $res (changelog).\n";
+
+//3rd way : "La brute"
+include('fingerprints/filesums.php');
+global $remoteSums;
+
+if(sizeof($versions = matchVersionsByFilesums($_filesums)) > 0){
+	$res = 'matched ';
+	foreach($versions as $v => $c){
+		$matched = intval($c*100/sizeof($targetSums));
+		if($matched > 75) $res .= ': '.$v.'('.$matched.'%)';
+	}
+}else
+	$res = 'not matched';
+
+echo "3. Possible version(s) $res (fingerprints).\n";
