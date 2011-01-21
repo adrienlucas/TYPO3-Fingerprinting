@@ -26,6 +26,10 @@
 
 include('inc/fingerprinting_functions.php');
 
+// hide notice for 404 pages
+error_reporting(E_ALL  && !E_NOTICE);
+
+
 echo "TYPO3 Fingerprinting (1st release)\n";
 if($argc < 2)
 	usage();
