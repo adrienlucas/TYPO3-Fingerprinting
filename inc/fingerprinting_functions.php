@@ -46,7 +46,7 @@ function matchVersionInChangelog($files){
 	$cl = '';
 	$versionMatches = array();
 	
-	while(!preg_match('#Release of TYPO3 ([0-9.-]+)#', $cl, $versionMatches))
+	while(!preg_match('#Release of TYPO3 ([0-9.-]+)#', $cl, $versionMatches) && !empty($files))
 		$cl = file_get_contents($_target . array_shift($files), FALSE, $_ctx);
 	
 	return isset($versionMatches[1]) ? $versionMatches[1] : FALSE;
